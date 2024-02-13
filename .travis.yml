@@ -1,0 +1,40 @@
+os: linux
+dist: jammy
+language: php
+
+cache:
+  npm: true
+  yarn: true
+  directories:
+  - "$HOME/.composer/cache"
+  - "./vendor"
+
+before_install:
+- phpenv config-rm xdebug.ini
+
+install:
+- composer install
+
+jobs:
+  include:
+  - stage: Lint
+    php: 8.2
+    script:
+    - composer lint
+
+  - stage: Update Draft GitHub Release
+    php: 8.2
+    if: branch = main
+    script:
+    - zip -r ../cmb2-message-field.zip ./ -x docs\* -x private\* -x vendor\* -x .\* -x CHANGELOG.md -x CODE_OF_CONDUCT.md -x composer.json -x composer.lock -x CONTRIBUTING.md -x LICENSE.md -x phpcs.xml -x SECURITY.md
+    deploy:
+      provider: releases
+      token:
+        secure: "P9RK5mk2cgnbCWQx5UaLsNh9j3nKswRMZKo5fxNSwOif6a+VQfHpAUiWXRz7GZelZCU4evFqVkrGwG2oI2C+fqDHHyQx2GjbulTQ6zVT2jIlLu4CJlEjFjZDKycClMtvmNtYQWlpeGdma6qyjZS5DGQtzVBW+eftCD/MpV7N3YuUvoA9io6moqpetXUmQT3dDdZg5ZvsQscbVMVmfMW/xCd3g2l2qcvc7lvFDOcMUtXmiNRfpgLWcJoIpliP0ADDfRGJ6bE8Eud2/McxPiHdHVR1yImrWqrr4ybri6lzYy+ILCqD3qagoNBGAcKcfSVdOcaM3wNMWLjONdBGMffm4E2PUEirm1Zells/kCcQlkQyrvk9/OR1t5hf2ykgG0Hmy5LTdjDxy3ZNOjwgPni+nj73AjKLL8olXhlETZglUVegcnNOmWTHEvBK+1Gbhz60EGZy10SvQi5ZYt2m2utN+HIleXYdNrdpOynmQ1AN3k6whlGvftsdGVKk7wpTHJgAk+uQNOs8Gah8UWojhJhSNj+seCz7iT+AkZg6V1esS2SmGEpVBW9Ekc/DFvL2U98xAjBhggENqwdHnKpuh1dSUZ7b6OxfW2+aKf2WNgtT1X6+pEtQ7+z4IxzgSUg8CoB/qIqc9MhyyuJkye98VQoBr1HGwA7I+YKr6/chBESL4vw="
+      file: "../cmb2-message-field.zip"
+      skip_cleanup: true
+      draft: true
+      overwrite: true
+      on:
+        repo: amnestywebsite/cmb2-message-field
+        branch: main
